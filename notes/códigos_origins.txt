@@ -1,0 +1,81 @@
+npm install protractor-jasmine2-html-reporter --save-dev
+_______________________________________________________________________________________________
+
+conf.js
+
+var Jasmine2HtmlReporter = require('protractor-jasmine2-html-reporter');
+
+exports.config = {
+    framework: 'jasmine',
+    seleniumAddress: 'http://localhost:4444/wd/hub',
+    specs: ['test_protractor_spec.js'],
+
+    onPrepare: function(){
+        jasmine.getEnv().addReporter(new Jasmine2HtmlReporter({
+            savePath: './tests/reports/'
+        }))
+    }
+  }
+_____________________________________________________________________________________
+HomePage.po.js
+
+var HomePage = function(){
+    this.title = 'Home — Conduit';
+    this.signed = element.all(by.xpath("//a[@class='nav-link ng-binding']")).first();
+
+};
+
+
+
+module.exports = HomePage;
+___________________________________________________________________________________
+SignupPage.po.js
+var SignupPage = function(){
+
+    this.title = 'Sign up — Conduit';
+    this.dirNgBind = element(by.linkText('ngBind'));
+    this.username = element(by.model('$ctrl.formData.username'));
+    this.email = element(by.model('$ctrl.formData.email'));
+    this.password = element(by.model('$ctrl.formData.password'));
+    this.signupButton = element(by.xpath("//button[@class='btn btn-lg btn-primary pull-xs-right ng-binding']"));
+    var text = "username has already been taken";
+    this.duplicaterusername = element(by.cssContainingText('li.ng-binding.ng-scope', text));
+
+};
+
+SignupPage.prototype.visit = function(){
+    browser.get('http://localhost:4000/#!/register');
+};
+
+module.exports = SignupPage;
+
+__________________________________________________________________________________________________
+test_signup_spec.js
+
+var SignupPage = require('./signupPage.po.js');
+var HomePage = require('./homePage.po.js');
+
+
+describe('Sign Up Test', function() {
+  var signupPage = new SignupPage();
+  var homePage = new HomePage();
+
+  beforeEach(function() {
+    signupPage.visit();
+    browser.driver.manage().window().maximize();
+  });
+
+  it('it should have a title', function() {
+    expect(browser.getTitle()).toEqual(signupPage.title);
+  });
+
+
+  it('it should sign up new user', function(){
+    signupPage.username.sendKeys('eli223455');
+    signupPage.email.sendKeys('eli223455@restuu.rr');
+    signupPage.password.sendKeys('1234567890');
+    signupPage.signupButton.click().then(function() {
+        expect(homePage.signed.getText()).toEqual('eli223455');
+      });
+  });
+});
